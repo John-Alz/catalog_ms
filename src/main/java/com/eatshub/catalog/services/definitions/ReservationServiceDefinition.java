@@ -10,8 +10,9 @@ import java.util.UUID;
 public interface ReservationServiceDefinition {
 
     Mono<ReservationCollection> createReservation(ReservationCollection reservation);
-    Flux<ReservationCollection> readByRestaurantId(String restaurantId);
-    Flux<ReservationCollection> readByRestaurantIdAndStatus(String restaurantId, ReservationStatus status);
+    Mono<ReservationCollection> readByReservationId(UUID reservationId);
+    Flux<ReservationCollection> readByRestaurantId(UUID restaurantId);
+    Flux<ReservationCollection> readByRestaurantIdAndStatus(UUID restaurantId, ReservationStatus status);
     Mono<ReservationCollection> updateReservation(ReservationCollection reservation, UUID reservationId);
     Mono<Void> deleteReservation(UUID reservationId);
 
