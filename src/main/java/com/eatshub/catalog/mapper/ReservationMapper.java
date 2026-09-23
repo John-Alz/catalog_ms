@@ -47,8 +47,6 @@ public interface ReservationMapper {
             reservation.setDate(dateTime[0]);
             reservation.setTime(dateTime[1]);
         }
-        reservation.setDate(null);
-        reservation.setTime(null);
     }
 
 
