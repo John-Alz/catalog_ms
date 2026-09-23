@@ -18,7 +18,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RerservationServiceImpl implements ReservationServiceDefinition {
+public class ReservationServiceImpl implements ReservationServiceDefinition {
 
     private final ReservationRepository reservationRepository;
     private final RestaurantRepository restaurantRepository;
@@ -62,7 +62,7 @@ public class RerservationServiceImpl implements ReservationServiceDefinition {
                     reservation.setCustomerName(updateReservation.getCustomerName());
                     reservation.setTime(updateReservation.getTime());
                     reservation.setPartySize(updateReservation.getPartySize());
-                    reservation.setReservationStatus(updateReservation.getReservationStatus());
+                    reservation.setStatus(updateReservation.getStatus());
                     reservation.setNotes(updateReservation.getNotes());
                     return reservationRepository.save(reservation)
                             .doOnSuccess(updatedReservation -> log.info("Reservation updated successfully with ID: " + updatedReservation.getId()))
@@ -86,8 +86,8 @@ public class RerservationServiceImpl implements ReservationServiceDefinition {
     }
 
     private ReservationCollection applyDefaultStatus(ReservationCollection reservation) {
-        if (Objects.isNull(reservation.getReservationStatus())) {
-            reservation.setReservationStatus(ReservationStatus.PENDING);
+        if (Objects.isNull(reservation.getStatus())) {
+            reservation.setStatus(ReservationStatus.PENDING);
         }
         return reservation;
     }
