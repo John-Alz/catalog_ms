@@ -59,20 +59,6 @@ public class ReservationValidator {
                     });
     }
 
-    public BusinessValidator<ReservationCollection> validateRestaurantIdBeforeUpdate() {
-        log.info("Validating restaurant id before update");
-        return reservation -> {
-            return restaurantRepository.findById(reservation.getRestaurantId())
-                    .switchIfEmpty(Mono.error(new BusinessException("Restaurant not found")))
-                    .flatMap(restaurant -> {
-                        if (!restaurant.getId().equals(reservation.getRestaurantId())) {
-                            return Mono.error(new BusinessException("Restaurant id mismatch"));
-                        }
-                        return  Mono.empty();
-                    });
-        };
-    }
-
     private boolean isRestaurantClosed(RestaurantCollection restaurant, String reservationTime) {
         try {
             if (Objects.isNull(restaurant.getCloseAt()) || Objects.isNull(reservationTime)) {

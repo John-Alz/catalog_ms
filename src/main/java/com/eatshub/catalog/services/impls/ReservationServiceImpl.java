@@ -6,12 +6,14 @@ import com.eatshub.catalog.model.ReservationCollection;
 import com.eatshub.catalog.repositories.ReservationRepository;
 import com.eatshub.catalog.repositories.RestaurantRepository;
 import com.eatshub.catalog.services.definitions.ReservationServiceDefinition;
+import com.eatshub.catalog.validators.ReservationValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,11 +24,17 @@ public class ReservationServiceImpl implements ReservationServiceDefinition {
 
     private final ReservationRepository reservationRepository;
     private final RestaurantRepository restaurantRepository;
+    private final ReservationValidator reservationValidator;
 
 
     @Override
     public Mono<ReservationCollection> createReservation(ReservationCollection reservation) {
-        return validateExistRestaurant(reservation.getRestaurantId()).thenReturn(reservation)
+        final var validations = List.of(
+                reservationValidator.validateRestaurantNotClosed(),
+                reservationValidator.validateAvailability()
+        );
+        return reservationValidator.applyValidations(reservation, validations)
+                .then(validateExistRestaurant(reservation.getRestaurantId()).thenReturn(reservation))
                 .map(this::applyDefaultStatus)
                 .doOnNext(reservationItem -> log.info("Saving reservation for restaurant: {}", reservationItem.getRestaurantId()))
                 .flatMap(reservationRepository::save)
@@ -57,7 +65,12 @@ public class ReservationServiceImpl implements ReservationServiceDefinition {
 
     @Override
     public Mono<ReservationCollection> updateReservation(ReservationCollection updateReservation, UUID reservationId) {
+        final var  validations = List.of(
+                reservationValidator.validateRestaurantNotClosed(),
+                reservationValidator.validateAvailability()
+        );
         return validateExistReservation(reservationId)
+                .flatMap(item -> reservationValidator.applyValidations(updateReservation, validations)).thenReturn(updateReservation)
                 .flatMap(reservation -> {
                     reservation.setCustomerName(updateReservation.getCustomerName());
                     reservation.setTime(updateReservation.getTime());
