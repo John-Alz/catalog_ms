@@ -10,7 +10,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
 public class ReservationUseCase {
 

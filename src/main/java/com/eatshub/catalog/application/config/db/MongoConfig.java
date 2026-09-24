@@ -1,4 +1,4 @@
-package com.eatshub.catalog.config;
+package com.eatshub.catalog.application.config.db;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
