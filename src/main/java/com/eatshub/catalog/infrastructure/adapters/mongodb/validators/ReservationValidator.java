@@ -4,6 +4,8 @@ import com.eatshub.catalog.infrastructure.adapters.clients.PlannerMSClient;
 import com.eatshub.catalog.domain.exceptions.BusinessException;
 import com.eatshub.catalog.domain.model.ReservationModel;
 import com.eatshub.catalog.domain.model.RestaurantModel;
+import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.ReservationCollection;
+import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.RestaurantCollection;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.repositories.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +34,7 @@ public class ReservationValidator {
         );
     }
 
-    public BusinessValidator<ReservationModel> validateRestaurantNotClosed() {
+    public BusinessValidator<ReservationCollection> validateRestaurantNotClosed() {
         log.info("Validating restaurant not closed");
         return reservation ->
              restaurantRepository.findById(reservation.getRestaurantId())
@@ -45,7 +47,7 @@ public class ReservationValidator {
                     });
     }
 
-    public BusinessValidator<ReservationModel> validateAvailability() {
+    public BusinessValidator<ReservationCollection> validateAvailability() {
         log.info("Validating availability");
         return reservation ->
                 plannerMSClient.verifyAvailability(reservation.getDate(), reservation.getTime(), reservation.getRestaurantId())
@@ -57,7 +59,7 @@ public class ReservationValidator {
                     });
     }
 
-    private boolean isRestaurantClosed(RestaurantModel restaurant, String reservationTime) {
+    private boolean isRestaurantClosed(RestaurantCollection restaurant, String reservationTime) {
         try {
             if (Objects.isNull(restaurant.getCloseAt()) || Objects.isNull(reservationTime)) {
                 return true;

@@ -6,9 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
-public interface RestaurantMapper {
+public interface RestaurantAdapterMapper {
 
-    RestaurantMapper MAPPER = Mappers.getMapper(RestaurantMapper.class);
+    RestaurantAdapterMapper MAPPER = Mappers.getMapper(RestaurantAdapterMapper.class);
 
     RestaurantModel toModel(RestaurantCollection collection);
     RestaurantCollection toEntity(RestaurantModel model);

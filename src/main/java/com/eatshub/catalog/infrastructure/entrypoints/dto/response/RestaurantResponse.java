@@ -13,6 +13,6 @@ public record RestaurantResponse(
          String logoUrl,
          String closeAt,
          ContactInfo contactInfo,
-         Integer globalRating
+         Double globalRating
 ) {
 }

@@ -14,15 +14,16 @@ import java.util.Objects;
 @Mapper(componentModel = "spring")
 public interface ReservationMapper {
 
-    @Mapping(target = "dateTime", expression = "java(joinDateAndTime(reservation.getDate(), reservation,getTime()))")
-    @Mapping(target = "notes", source = "comment")
-    ReservationModel toModel(ReservationRequest reservationRequest);
 
-    @Mapping(target = "dateTime", expression = "java(joinDateAndTime(reservation.getDate(), reservation,getTime()))")
+    @Mapping(target = "dateTime", expression = "java(joinDateAndTime(reservation.getDate(), reservation.getTime()))")
+    ReservationResponse toResponse(ReservationModel reservation);
+
+    @Mapping(target = "notes", source = "comment")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "date", ignore = true)
     @Mapping(target = "time", ignore = true)
-    ReservationResponse toResponse(ReservationModel reservation);
+    ReservationModel toModel(ReservationRequest reservationRequest);
+
 
     default Mono<ReservationModel> toRequestMono(Mono<ReservationRequest> reservationRequest) {
         return reservationRequest.map(this::toModel);

@@ -13,7 +13,7 @@ public class Review {
 
     private String customerId;
     private String customerName;
-    private Integer rating;
+    private Double rating;
     private String comment;
     private LocalDateTime timestamp;
 

@@ -6,9 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
-public interface ReservationMapper {
+public interface ReservationAdapterMapper {
 
-    ReservationMapper MAPPER = Mappers.getMapper(ReservationMapper.class);
+    ReservationAdapterMapper MAPPER = Mappers.getMapper(ReservationAdapterMapper.class);
 
     ReservationModel toModel(ReservationCollection collection);
     ReservationCollection toEntity(ReservationModel model);
