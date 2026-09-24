@@ -4,10 +4,8 @@ import com.eatshub.catalog.domain.gateways.RestaurantCatalogGateway;
 import com.eatshub.catalog.domain.model.RestaurantModel;
 import com.eatshub.catalog.domain.enums.PriceType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-@Service
 @RequiredArgsConstructor
 public class RestaurantUseCase {
 
