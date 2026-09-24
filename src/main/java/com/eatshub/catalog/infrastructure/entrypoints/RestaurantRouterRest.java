@@ -1,7 +1,6 @@
 package com.eatshub.catalog.infrastructure.entrypoints;
 
 import com.eatshub.catalog.infrastructure.entrypoints.handler.RestaurantHandler;
-import com.eatshub.catalog.infrastructure.entrypoints.mapper.RestaurantMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
