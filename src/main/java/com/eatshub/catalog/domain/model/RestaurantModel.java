@@ -1,6 +1,6 @@
 package com.eatshub.catalog.domain.model;
 
-import com.eatshub.catalog.domain.enums.PriceRange;
+import com.eatshub.catalog.domain.enums.PriceType;
 import com.eatshub.catalog.domain.records.Address;
 import com.eatshub.catalog.domain.records.ContactInfo;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ public class RestaurantModel {
     private String capacity;
     private Address address;
     private String cuisineType;
-    private PriceRange priceRange;
+    private PriceType priceType;
     private String openHours;
     private String logoUrl;
     private String closeAt;

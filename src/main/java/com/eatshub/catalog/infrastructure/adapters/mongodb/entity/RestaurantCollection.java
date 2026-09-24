@@ -1,6 +1,6 @@
 package com.eatshub.catalog.infrastructure.adapters.mongodb.entity;
 
-import com.eatshub.catalog.domain.enums.PriceRange;
+import com.eatshub.catalog.domain.enums.PriceType;
 import com.eatshub.catalog.domain.records.Address;
 import com.eatshub.catalog.domain.records.ContactInfo;
 import lombok.AllArgsConstructor;
@@ -30,7 +30,7 @@ public class RestaurantCollection {
     @Indexed
     private String cuisineType;
     @Indexed
-    private PriceRange priceRange;
+    private PriceType priceType;
     private String openHours;
     private String logoUrl;
     private String closeAt;

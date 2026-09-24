@@ -2,12 +2,10 @@ package com.eatshub.catalog.domain.usecase;
 
 import com.eatshub.catalog.domain.gateways.RestaurantCatalogGateway;
 import com.eatshub.catalog.domain.model.RestaurantModel;
-import com.eatshub.catalog.domain.enums.PriceRange;
+import com.eatshub.catalog.domain.enums.PriceType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +25,8 @@ public class RestaurantUseCase {
         return restaurantCatalogGateway.readByName(name);
     }
 
-    public Flux<RestaurantModel> readByPriceRange(List<PriceRange> priceRanges) {
-        return restaurantCatalogGateway.readByPriceRange(priceRanges);
+    public Flux<RestaurantModel> readByPriceRange(String priceType) {
+        return restaurantCatalogGateway.readByPriceType(PriceType.valueOf(priceType.toUpperCase()));
     }
     public Flux<RestaurantModel> readByCity(String city) {
         return  restaurantCatalogGateway.readByCity(city);

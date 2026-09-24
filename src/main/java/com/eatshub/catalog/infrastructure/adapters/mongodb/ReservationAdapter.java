@@ -117,6 +117,6 @@ public class ReservationAdapter implements ReservationGateway {
 
     private Mono<ReservationCollection> validateExistReservation(UUID reservationId) {
         return reservationRepository.findById(reservationId)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Reservation not found")));
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new ResourceNotFoundException("Reservation not found"))));
     }
 }

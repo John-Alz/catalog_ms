@@ -1,6 +1,6 @@
 package com.eatshub.catalog.domain.enums;
 
-public enum PriceRange {
+public enum PriceType {
 
     CHEAP,
     MEDIUM,

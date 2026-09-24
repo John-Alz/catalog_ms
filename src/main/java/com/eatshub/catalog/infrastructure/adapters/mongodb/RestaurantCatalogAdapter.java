@@ -1,6 +1,6 @@
 package com.eatshub.catalog.infrastructure.adapters.mongodb;
 
-import com.eatshub.catalog.domain.enums.PriceRange;
+import com.eatshub.catalog.domain.enums.PriceType;
 import com.eatshub.catalog.domain.model.RestaurantModel;
 import com.eatshub.catalog.domain.records.Address;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.RestaurantCollection;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -53,8 +52,8 @@ public class RestaurantCatalogAdapter implements RestaurantCatalogGateway {
     }
 
     @Override
-    public Flux<RestaurantModel> readByPriceRange(List<PriceRange> priceRanges) {
-        return restaurantRepository.findByPriceRangeIn(priceRanges)
+    public Flux<RestaurantModel> readByPriceType(PriceType priceType) {
+        return restaurantRepository.findByPriceType(priceType)
                 .switchIfEmpty(Flux.empty().cast(RestaurantCollection.class)
                         .doOnSubscribe(subscription -> log.info("Restaurants is empty")))
                 .map(RestaurantAdapterMapper.MAPPER::toModel);
