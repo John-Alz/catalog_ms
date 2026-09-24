@@ -61,28 +61,10 @@ public class RestaurantCatalogAdapter implements RestaurantCatalogGateway {
 
     @Override
     public Flux<RestaurantModel> readByCity(String city) {
-        return validateCityExists(city)
-                .thenMany(restaurantRepository.findByAddressCity(city))
+        return restaurantRepository.findByAddressCity(city)
                 .map(RestaurantAdapterMapper.MAPPER::toModel)
                 .doOnNext(restaurant -> log.info("Found restaurant in "+ city + " with name: " + restaurant.getName()))
                 .doOnError(error -> log.error("Error: " + error.getMessage()));
     }
 
-
-    private Mono<Void> validateCityExists(String city){
-            return restaurantRepository.findAll()
-                    .map(RestaurantCollection::getAddress)
-                    .filter(Objects::nonNull)
-                    .map(Address::city)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .any(cityName -> cityName.equals(city))
-                    .flatMap(exist -> {
-                        if (exist) {
-                            return Mono.empty();
-                        }
-                        log.warn("City not found: {}", city);
-                        return Mono.error(new RuntimeException("City not found: " + city));
-                    });
-        }
 }
