@@ -1,11 +1,8 @@
 package com.eatshub.catalog;
 
-import com.eatshub.catalog.enums.PriceRange;
-import com.eatshub.catalog.model.ReservationCollection;
-import com.eatshub.catalog.repositories.ReservationRepository;
-import com.eatshub.catalog.services.definitions.ReservationServiceDefinition;
-import com.eatshub.catalog.services.definitions.RestaurantCatalogService;
-import com.eatshub.catalog.services.impls.ReservationServiceImpl;
+import com.eatshub.catalog.domain.model.ReservationModel;
+import com.eatshub.catalog.infrastructure.adapters.mongodb.repositories.ReservationRepository;
+import com.eatshub.catalog.domain.gateways.ReservationGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,7 +14,7 @@ import java.util.UUID;
 public class CatalogApplication implements CommandLineRunner {
 
 	@Autowired
-	private ReservationServiceDefinition reservationCrudService;
+	private ReservationGateway reservationCrudService;
 
 	@Autowired
 	private ReservationRepository reservationRepository;
@@ -62,9 +59,9 @@ public class CatalogApplication implements CommandLineRunner {
 
 	}
 
-	private ReservationCollection createTestReservation(String restaurantId, String customerName,
-														int partySize, String date, String time, String notes) {
-		return ReservationCollection.builder()
+	private ReservationModel createTestReservation(String restaurantId, String customerName,
+												   int partySize, String date, String time, String notes) {
+		return ReservationModel.builder()
 				.id(UUID.randomUUID())
 				.restaurantId(UUID.fromString(restaurantId))
 				.customerName(customerName)
