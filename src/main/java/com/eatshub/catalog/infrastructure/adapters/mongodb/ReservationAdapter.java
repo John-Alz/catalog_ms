@@ -37,7 +37,7 @@ public class ReservationAdapter implements ReservationGateway {
 
     @Override
     public Flux<ReservationModel> readByRestaurantId(UUID restaurantId) {
-        return reservationRepository.findByRestaurantId(restaurantId.toString())
+        return reservationRepository.findByRestaurantId(restaurantId)
                 .map(ReservationAdapterMapper.MAPPER::toModel)
                 .doOnNext(reservation -> log.info("Found reservation for restaurant: " + restaurantId))
                 .doOnError(error -> log.error("Error: " + error.getMessage()));

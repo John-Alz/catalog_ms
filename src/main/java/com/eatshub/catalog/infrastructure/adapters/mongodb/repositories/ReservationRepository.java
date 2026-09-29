@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface ReservationRepository extends ReactiveMongoRepository<ReservationCollection, UUID> {
 
-    Flux<ReservationCollection> findByRestaurantId(String restaurantId);
+    Flux<ReservationCollection> findByRestaurantId(UUID restaurantId);
     Flux<ReservationCollection> findByRestaurantIdAndStatus(UUID restaurantId, ReservationStatus status);
 
 }
