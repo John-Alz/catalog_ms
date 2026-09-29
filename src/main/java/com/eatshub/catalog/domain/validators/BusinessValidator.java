@@ -1,4 +1,4 @@
-package com.eatshub.catalog.infrastructure.adapters.mongodb.validators;
+package com.eatshub.catalog.domain.validators;
 
 import reactor.core.publisher.Mono;
 

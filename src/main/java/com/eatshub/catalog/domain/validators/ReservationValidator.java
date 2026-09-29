@@ -1,9 +1,11 @@
-package com.eatshub.catalog.infrastructure.adapters.mongodb.validators;
+package com.eatshub.catalog.domain.validators;
 
-import com.eatshub.catalog.infrastructure.adapters.clients.PlannerMSClient;
-import com.eatshub.catalog.domain.exceptions.BusinessException;
+import com.eatshub.catalog.domain.gateways.ReservationGateway;
+import com.eatshub.catalog.domain.gateways.RestaurantCatalogGateway;
 import com.eatshub.catalog.domain.model.ReservationModel;
 import com.eatshub.catalog.domain.model.RestaurantModel;
+import com.eatshub.catalog.infrastructure.adapters.clients.PlannerMSClient;
+import com.eatshub.catalog.domain.exceptions.BusinessException;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.ReservationCollection;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.RestaurantCollection;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.repositories.RestaurantRepository;
@@ -22,7 +24,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ReservationValidator {
 
-    private final RestaurantRepository restaurantRepository;
+    private final RestaurantCatalogGateway restaurantCatalogGateway;
     private final PlannerMSClient plannerMSClient;
 
     public <T>Mono<Void>  applyValidations(T input, List<BusinessValidator<T>> validations) {
@@ -34,10 +36,10 @@ public class ReservationValidator {
         );
     }
 
-    public BusinessValidator<ReservationCollection> validateRestaurantNotClosed() {
+    public BusinessValidator<ReservationModel> validateRestaurantNotClosed() {
         log.info("Validating restaurant not closed");
         return reservation ->
-             restaurantRepository.findById(reservation.getRestaurantId())
+             restaurantCatalogGateway.readById(reservation.getRestaurantId())
                     .switchIfEmpty(Mono.error(new BusinessException("Restaurant not found")))
                     .flatMap(restaurant -> {
                         if (isRestaurantClosed(restaurant, reservation.getTime())) {
@@ -47,7 +49,7 @@ public class ReservationValidator {
                     });
     }
 
-    public BusinessValidator<ReservationCollection> validateAvailability() {
+    public BusinessValidator<ReservationModel> validateAvailability() {
         log.info("Validating availability");
         return reservation ->
                 plannerMSClient.verifyAvailability(reservation.getDate(), reservation.getTime(), reservation.getRestaurantId())
@@ -59,7 +61,7 @@ public class ReservationValidator {
                     });
     }
 
-    private boolean isRestaurantClosed(RestaurantCollection restaurant, String reservationTime) {
+    private boolean isRestaurantClosed(RestaurantModel restaurant, String reservationTime) {
         try {
             if (Objects.isNull(restaurant.getCloseAt()) || Objects.isNull(reservationTime)) {
                 return true;
