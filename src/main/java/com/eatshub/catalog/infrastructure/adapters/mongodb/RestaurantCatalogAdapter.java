@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -26,6 +27,12 @@ public class RestaurantCatalogAdapter implements RestaurantCatalogGateway {
     public Flux<RestaurantModel> readAll() {
         return restaurantRepository.findAll()
                 .doOnNext(restaurantModel -> log.info("id restaurant: " + restaurantModel.getId()))
+                .map(RestaurantAdapterMapper.MAPPER::toModel);
+    }
+
+    @Override
+    public Mono<RestaurantModel> readById(UUID id) {
+        return restaurantRepository.findById(id)
                 .map(RestaurantAdapterMapper.MAPPER::toModel);
     }
 
