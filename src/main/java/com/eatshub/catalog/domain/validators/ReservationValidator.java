@@ -67,9 +67,9 @@ public class ReservationValidator {
                 return true;
             }
             LocalTime closeLocalTime = LocalTime.parse(restaurant.getCloseAt(), DateTimeFormatter.ofPattern("HH:mm"));
-            LocalTime reservtionLocalTime = LocalTime.parse(reservationTime, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime reservationLocalTime = LocalTime.parse(reservationTime, DateTimeFormatter.ofPattern("HH:mm"));
 
-            return reservtionLocalTime.isAfter(closeLocalTime);
+            return reservationLocalTime.isAfter(closeLocalTime);
 
         } catch (Exception e) {
             log.error("Error on verify close time: " + e);

@@ -62,7 +62,6 @@ public class ReservationAdapter implements ReservationGateway {
     @Override
     public Mono<Void> deleteReservation(UUID reservationId) {
         return reservationRepository.deleteById(reservationId)
-                .doOnNext(reservation -> log.info("Deleting reservation with ID: " + reservationId))
                 .doOnSuccess(sub -> log.info("Reservation deleted successfully with ID: " + reservationId))
                 .doOnError(error -> log.error("Error deleting reservation: " + error.getMessage()));
     }

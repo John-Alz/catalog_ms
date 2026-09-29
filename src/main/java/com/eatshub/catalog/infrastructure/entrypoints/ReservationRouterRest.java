@@ -17,7 +17,6 @@ public class ReservationRouterRest {
         return queryParam(name, v -> true);
     }
 
-
     @Bean
     public RouterFunction<ServerResponse> reservationRouterFunction(ReservationHandler handler){
         return RouterFunctions.route()
@@ -25,6 +24,8 @@ public class ReservationRouterRest {
                 .GET("/reservation/{reservationId}", handler::getReservationById)
                 .GET("/reservations", has("restaurantId").and(has("reservationStatus")), handler::readByRestaurantIdAndStatus)
                 .GET("/reservations", has("restaurantId"), handler::getReservationsByRestaurant)
+                .PUT("/reservation", handler::updateReservation)
+                .DELETE("/reservations/{reservationId}", handler::deleteReservation)
                 .build();
     }
 }
