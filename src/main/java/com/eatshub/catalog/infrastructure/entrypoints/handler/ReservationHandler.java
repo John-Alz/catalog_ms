@@ -1,5 +1,6 @@
 package com.eatshub.catalog.infrastructure.entrypoints.handler;
 
+import com.eatshub.catalog.domain.enums.ReservationStatus;
 import com.eatshub.catalog.domain.usecase.ReservationUseCase;
 import com.eatshub.catalog.infrastructure.entrypoints.dto.request.ReservationRequest;
 import com.eatshub.catalog.infrastructure.entrypoints.mapper.ReservationMapper;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -31,7 +34,47 @@ public class ReservationHandler {
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(reservationResponse))
-                .doOnError(throwable -> log.error("Error while creating reservation", throwable));
+                .doOnSuccess(response -> log.info("Reservation created successfully"))
+                .doOnError(throwable -> log.error("Error while creating reservation", throwable.getMessage()));
+    }
+
+    public Mono<ServerResponse> getReservationById(ServerRequest request) {
+        return reservationUseCase.readByReservationId(UUID.fromString(request.pathVariable("reservationId")))
+                .map(reservationMapper::toResponse)
+                .flatMap(reservationResponse -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(reservationResponse)
+                )
+                .doOnSuccess(response -> log.info("Get reservation successfully"))
+                .doOnError(throwable -> log.error("Error while getting reservation", throwable.getMessage()));
+    }
+
+    public Mono<ServerResponse> getReservationsByRestaurant(ServerRequest request) {
+        String restaurantId = request.queryParam("restaurantId").orElse("");
+        return reservationUseCase.readByRestaurantId(UUID.fromString(restaurantId))
+                .transform(reservationMapper::toResponseFlux)
+                .collectList()
+                .flatMap(reservationResponse -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(reservationResponse))
+                .doOnSuccess(response -> log.info("Get reservations successfully"))
+                .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()));
+    }
+
+    public Mono<ServerResponse> readByRestaurantIdAndStatus(ServerRequest request) {
+        String restaurantId = request.queryParam("restaurantId").orElse("");
+        String reservationStatus = request.queryParam("reservationStatus").orElse("");
+        return reservationUseCase.readByRestaurantIdAndStatus(UUID.fromString(restaurantId), ReservationStatus.valueOf(reservationStatus))
+                .transform(reservationMapper::toResponseFlux)
+                .collectList()
+                .flatMap(reservationResponses -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(reservationResponses))
+                .doOnSuccess(response -> log.info("Get reservations successfully"))
+                .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()));
     }
 
 }
