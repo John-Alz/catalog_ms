@@ -77,6 +77,19 @@ public class ReservationHandler {
                 .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()));
     }
 
+    public Mono<ServerResponse> updateReservation(ServerRequest request) {
+        return request.bodyToMono(ReservationRequest.class)
+                .transform(reservationMapper::toRequestMono)
+                .flatMap(reservationRequest -> reservationUseCase.updateReservation(reservationRequest, UUID.fromString(request.pathVariable("reservationId"))))
+                .transform(reservationMapper::toResponseMono)
+                .flatMap(reservationResponse -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(reservationResponse))
+                .doOnSuccess(response -> log.info("Update reservation successfully"))
+                .doOnError(throwable -> log.error("Error while updating reservation", throwable.getMessage()));
+    }
+
     public Mono<ServerResponse> deleteReservation(ServerRequest request) {
         return reservationUseCase.deleteReservation(UUID.fromString(request.pathVariable("reservationId")))
                 .then(ServerResponse.noContent().build())
