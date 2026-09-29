@@ -77,4 +77,11 @@ public class ReservationHandler {
                 .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()));
     }
 
+    public Mono<ServerResponse> deleteReservation(ServerRequest request) {
+        return reservationUseCase.deleteReservation(UUID.fromString(request.pathVariable("reservationId")))
+                .then(ServerResponse.noContent().build())
+                .doOnSuccess(response -> log.info("Delete reservation successfully"))
+                .doOnError(throwable -> log.error("Error while deleting reservation", throwable.getMessage()));
+    }
+
 }
