@@ -12,6 +12,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -31,7 +33,20 @@ public class ReservationHandler {
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(reservationResponse))
-                .doOnError(throwable -> log.error("Error while creating reservation", throwable));
+                .doOnSuccess(response -> log.info("Reservation created successfully"))
+                .doOnError(throwable -> log.error("Error while creating reservation", throwable.getMessage()));
+    }
+
+    public Mono<ServerResponse> getReservationById(ServerRequest request) {
+        return reservationUseCase.readByReservationId(UUID.fromString(request.pathVariable("reservationId")))
+                .map(reservationMapper::toResponse)
+                .flatMap(reservationResponse -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(reservationResponse)
+                )
+                .doOnSuccess(response -> log.info("Get reservation successfully"))
+                .doOnError(throwable -> log.error("Error while getting reservation", throwable.getMessage()));
     }
 
 }
