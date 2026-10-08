@@ -25,6 +25,7 @@ public class ReservationUseCase {
     private final ReservationValidator reservationValidator;
 
     public Mono<ReservationModel> createReservation(ReservationModel reservationModel) {
+        reservationModel.setId(UUID.randomUUID());
         List<BusinessValidator<ReservationModel>> validations = List.of(
                 reservationValidator.validateRestaurantNotClosed(),
                 reservationValidator.validateAvailability()

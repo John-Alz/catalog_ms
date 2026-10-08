@@ -24,8 +24,8 @@ public class ReservationRouterRest {
                 .GET("/reservation/{reservationId}", handler::getReservationById)
                 .GET("/reservations", has("restaurantId").and(has("reservationStatus")), handler::readByRestaurantIdAndStatus)
                 .GET("/reservations", has("restaurantId"), handler::getReservationsByRestaurant)
-                .PUT("/reservation", handler::updateReservation)
-                .DELETE("/reservations/{reservationId}", handler::deleteReservation)
+                .PUT("/reservation/{reservationId}", handler::updateReservation)
+                .DELETE("/reservation/{reservationId}", handler::deleteReservation)
                 .build();
     }
 }

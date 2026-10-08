@@ -6,6 +6,7 @@ import com.eatshub.catalog.domain.model.ReservationModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,8 +21,8 @@ public interface ReservationMapper {
 
     @Mapping(target = "notes", source = "comment")
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "date", ignore = true)
-    @Mapping(target = "time", ignore = true)
+    @Mapping(target = "date", source = "dateTime", qualifiedByName = "extractDate")
+    @Mapping(target = "time", source = "dateTime", qualifiedByName = "extractTime")
     ReservationModel toModel(ReservationRequest reservationRequest);
 
 
@@ -41,14 +42,17 @@ public interface ReservationMapper {
         return String.join(",", date, time);
     }
 
-    default void splitDateTime(ReservationRequest reservationRequest,
-                               @MappingTarget ReservationModel reservation) {
-        if (Objects.nonNull(reservationRequest.dateTime())) {
-            String[] dateTime = reservationRequest.dateTime().split(",");
-            reservation.setDate(dateTime[0]);
-            reservation.setTime(dateTime[1]);
-        }
+
+    @Named("extractDate")
+    default String extractDate(String dateTime) {
+        return dateTime == null ? null : dateTime.split(",")[0];
     }
+
+    @Named("extractTime")
+    default String extractTime(String dateTime) {
+        return dateTime == null ? null : dateTime.split(",")[1];
+    }
+
 
 
 }
