@@ -3,6 +3,7 @@ package com.eatshub.catalog.infrastructure.entrypoints.handler;
 import com.eatshub.catalog.domain.enums.ReservationStatus;
 import com.eatshub.catalog.domain.usecase.ReservationUseCase;
 import com.eatshub.catalog.infrastructure.entrypoints.dto.request.ReservationRequest;
+import com.eatshub.catalog.infrastructure.entrypoints.dto.response.ErrorResponse;
 import com.eatshub.catalog.infrastructure.entrypoints.mapper.ReservationMapper;
 import com.eatshub.catalog.infrastructure.entrypoints.util.RequestValidator;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,8 @@ public class ReservationHandler {
                         .bodyValue(reservationResponse)
                 )
                 .doOnSuccess(response -> log.info("Get reservation successfully"))
-                .doOnError(throwable -> log.error("Error while getting reservation", throwable.getMessage()));
+                .doOnError(throwable -> log.error("Error while getting reservation", throwable.getMessage()))
+                .onErrorResume(throwable -> ServerResponse.badRequest().bodyValue(buildErrorResponse(throwable)));
     }
 
     public Mono<ServerResponse> getReservationsByRestaurant(ServerRequest request) {
@@ -95,6 +97,13 @@ public class ReservationHandler {
                 .then(ServerResponse.noContent().build())
                 .doOnSuccess(response -> log.info("Delete reservation successfully"))
                 .doOnError(throwable -> log.error("Error while deleting reservation", throwable.getMessage()));
+    }
+
+    private ErrorResponse buildErrorResponse(Throwable throwable) {
+        return ErrorResponse.builder()
+                .status(404)
+                .message(throwable.getMessage())
+                .build();
     }
 
 }
