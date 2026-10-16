@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -40,6 +41,14 @@ public class RedisAdapter implements RestaurantCacheGateway {
     public Mono<RestaurantModel> getCacheRestaurant(String key) {
         return restaurantTemplate.opsForValue().get(key)
                 .doOnNext(restaurantCacheDto -> log.info("Get cached restaurant: " + restaurantCacheDto.name()))
+                .map(restaurantCacheMapper::toModel);
+    }
+
+    @Override
+    public Flux<RestaurantModel> getCacheRestaurants(String key) {
+        return restaurantListTemplate.opsForValue()
+                .get(REDIS_CACHE_PREFIX + key)
+                .flatMapMany(Flux::fromIterable)
                 .map(restaurantCacheMapper::toModel);
     }
 
