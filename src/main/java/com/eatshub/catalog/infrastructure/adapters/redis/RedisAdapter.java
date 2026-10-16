@@ -39,7 +39,7 @@ public class RedisAdapter implements RestaurantCacheGateway {
 
     @Override
     public Mono<RestaurantModel> getCacheRestaurant(String key) {
-        return restaurantTemplate.opsForValue().get(key)
+        return restaurantTemplate.opsForValue().get(REDIS_CACHE_PREFIX + key)
                 .doOnNext(restaurantCacheDto -> log.info("Get cached restaurant: " + restaurantCacheDto.name()))
                 .map(restaurantCacheMapper::toModel);
     }
