@@ -1,10 +1,11 @@
 package com.eatshub.catalog.domain.usecase;
 
+import com.eatshub.catalog.domain.constats.Constants;
+import com.eatshub.catalog.domain.gateways.RestaurantCacheGateway;
 import com.eatshub.catalog.domain.gateways.RestaurantCatalogGateway;
 import com.eatshub.catalog.domain.model.RestaurantModel;
 import com.eatshub.catalog.domain.enums.PriceType;
 import com.eatshub.catalog.domain.records.Address;
-import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.RestaurantCollection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -17,13 +18,19 @@ import java.util.Objects;
 public class RestaurantUseCase {
 
     private final RestaurantCatalogGateway restaurantCatalogGateway;
+    private final RestaurantCacheGateway restaurantCacheGateway;
 
     public Flux<RestaurantModel> readAll() {
         return restaurantCatalogGateway.readAll();
     }
 
     public Flux<RestaurantModel> readByCuisineType(String cuisineType) {
-        return restaurantCatalogGateway.readByCuisineType(cuisineType);
+        final String cacheKey = buildNameKey(cuisineType);
+        return restaurantCacheGateway.getCacheRestaurants(cacheKey)
+                .switchIfEmpty(Flux.defer(() -> restaurantCatalogGateway.readByCuisineType(cuisineType)
+                        .collectList()
+                        .flatMapMany(restaurant -> restaurantCacheGateway.saveCacheRestaurants(cacheKey, restaurant))
+                ));
     }
 
     public Flux<RestaurantModel> readByName(String name) {
@@ -53,6 +60,10 @@ public class RestaurantUseCase {
                     log.warn("City not found: {}", city);
                     return Mono.error(new RuntimeException("City not found: " + city));
                 });
+    }
+
+    private static String buildNameKey(String restaurantName) {
+        return Constants.REDIS_CACHE_PREFIX + restaurantName.toLowerCase();
     }
 
 }

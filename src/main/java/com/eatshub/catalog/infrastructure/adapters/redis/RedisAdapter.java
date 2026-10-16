@@ -32,14 +32,14 @@ public class RedisAdapter implements RestaurantCacheGateway {
     public Mono<RestaurantModel> saveCacheRestaurant(String key, RestaurantModel restaurant) {
         RestaurantCacheDto restaurantCacheDto = restaurantCacheMapper.toDto(restaurant);
         return restaurantTemplate.opsForValue()
-                .set(buildNameKey(restaurant.getName()), restaurantCacheDto, TTL)
+                .set(REDIS_CACHE_PREFIX + key, restaurantCacheDto, TTL)
                 .thenReturn(restaurant)
                 .doOnSuccess(restaurantModel ->  log.info("Saved restaurant with key {}", restaurantModel.getName()));
     }
 
     @Override
     public Mono<RestaurantModel> getCacheRestaurant(String key) {
-        return restaurantTemplate.opsForValue().get(key)
+        return restaurantTemplate.opsForValue().get(REDIS_CACHE_PREFIX + key)
                 .doOnNext(restaurantCacheDto -> log.info("Get cached restaurant: " + restaurantCacheDto.name()))
                 .map(restaurantCacheMapper::toModel);
     }
@@ -50,7 +50,11 @@ public class RedisAdapter implements RestaurantCacheGateway {
                 .get(REDIS_CACHE_PREFIX + key)
                 .flatMapMany(Flux::fromIterable)
                 .doOnNext(response -> log.info("Get cached restaurants: " + response.name()))
-                .map(restaurantCacheMapper::toModel);
+                .map(restaurantCacheMapper::toModel)
+                .onErrorResume(ex -> {
+                    log.error("Error getting cached restaurants", ex);
+                    return Flux.empty();
+                });
     }
 
     @Override
@@ -60,15 +64,14 @@ public class RedisAdapter implements RestaurantCacheGateway {
                 .collectList()
                 .flatMap(restaurantCacheDto -> restaurantListTemplate
                         .opsForValue()
-                        .set(REDIS_CACHE_PREFIX + key, restaurantCacheDto, TTL)
-                        .thenReturn(restaurants))
-                .flatMapMany(Flux::fromIterable)
-                .doOnComplete(() -> log.info("Saved restaurants: " + restaurants));
+                        .set(REDIS_CACHE_PREFIX + key, restaurantCacheDto, TTL))
+                .doOnSuccess(isOk -> log.info("Saved cache key={} items={}", key, restaurants.size()))
+                .onErrorResume(ex -> {
+                    log.error("Error saving restaurants", ex);
+                    return Mono.empty();
+                })
+                .thenMany(Flux.fromIterable(restaurants));
     }
 
-
-    public static String buildNameKey(String restaurantName) {
-        return REDIS_CACHE_PREFIX + restaurantName.toLowerCase();
-    }
 
 }
