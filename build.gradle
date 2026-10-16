@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-validation'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webflux-test'
+	implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 
 	//Lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -42,6 +43,10 @@ dependencies {
 	implementation("org.mapstruct:mapstruct:1.6.3")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
+	//Jackson
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.3")
 }
 
 tasks.named('test') {
