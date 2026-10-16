@@ -49,7 +49,21 @@ public class RedisAdapter implements RestaurantCacheGateway {
         return restaurantListTemplate.opsForValue()
                 .get(REDIS_CACHE_PREFIX + key)
                 .flatMapMany(Flux::fromIterable)
+                .doOnNext(response -> log.info("Get cached restaurants: " + response.name()))
                 .map(restaurantCacheMapper::toModel);
+    }
+
+    @Override
+    public Flux<RestaurantModel> saveCacheRestaurants(String key, List<RestaurantModel> restaurants) {
+        return Flux.fromIterable(restaurants)
+                .map(restaurantCacheMapper::toDto)
+                .collectList()
+                .flatMap(restaurantCacheDto -> restaurantListTemplate
+                        .opsForValue()
+                        .set(REDIS_CACHE_PREFIX + key, restaurantCacheDto, TTL)
+                        .thenReturn(restaurants))
+                .flatMapMany(Flux::fromIterable)
+                .doOnComplete(() -> log.info("Saved restaurants: " + restaurants));
     }
 
 
