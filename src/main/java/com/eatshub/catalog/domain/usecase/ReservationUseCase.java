@@ -7,9 +7,7 @@ import com.eatshub.catalog.domain.gateways.RestaurantCatalogGateway;
 import com.eatshub.catalog.domain.model.ReservationModel;
 import com.eatshub.catalog.domain.validators.BusinessValidator;
 import com.eatshub.catalog.domain.validators.ReservationValidator;
-import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.ReservationCollection;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

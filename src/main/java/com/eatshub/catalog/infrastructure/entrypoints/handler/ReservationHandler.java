@@ -1,10 +1,9 @@
 package com.eatshub.catalog.infrastructure.entrypoints.handler;
 
 import com.eatshub.catalog.domain.enums.ReservationStatus;
-import com.eatshub.catalog.domain.exceptions.BusinessException;
+import com.eatshub.catalog.domain.exceptions.ResourceNotFoundException;
 import com.eatshub.catalog.domain.usecase.ReservationUseCase;
 import com.eatshub.catalog.infrastructure.entrypoints.dto.request.ReservationRequest;
-import com.eatshub.catalog.infrastructure.entrypoints.dto.response.ErrorResponse;
 import com.eatshub.catalog.infrastructure.entrypoints.mapper.ReservationMapper;
 import com.eatshub.catalog.infrastructure.entrypoints.util.ErrorResponseFactory;
 import com.eatshub.catalog.infrastructure.entrypoints.util.RequestValidator;
@@ -39,7 +38,9 @@ public class ReservationHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(reservationResponse))
                 .doOnSuccess(response -> log.info("Reservation created successfully"))
-                .doOnError(throwable -> log.error("Error while creating reservation", throwable.getMessage()));
+                .doOnError(throwable -> log.error("Error while creating reservation", throwable.getMessage()))
+                .onErrorResume(ResourceNotFoundException.class, error -> ErrorResponseFactory.build(HttpStatus.NOT_FOUND, error.getMessage()))
+                .onErrorResume( error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
 
     public Mono<ServerResponse> getReservationById(ServerRequest request) {
@@ -52,10 +53,8 @@ public class ReservationHandler {
                 )
                 .doOnSuccess(response -> log.info("Get reservation successfully"))
                 .doOnError(throwable -> log.error("Error while getting reservation", throwable.getMessage()))
-                .onErrorResume(throwable -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, throwable.getMessage()))
-                .onErrorResume(BusinessException.class,
-                        throwable -> ErrorResponseFactory.build(HttpStatus.BAD_REQUEST,
-                        throwable.getMessage()));
+                .onErrorResume(ResourceNotFoundException.class, error -> ErrorResponseFactory.build(HttpStatus.NOT_FOUND, error.getMessage()))
+                .onErrorResume( error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
 
     public Mono<ServerResponse> getReservationsByRestaurant(ServerRequest request) {
@@ -68,7 +67,9 @@ public class ReservationHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(reservationResponse))
                 .doOnSuccess(response -> log.info("Get reservations successfully"))
-                .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()));
+                .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()))
+                .onErrorResume(ResourceNotFoundException.class, error -> ErrorResponseFactory.build(HttpStatus.NOT_FOUND, error.getMessage()))
+                .onErrorResume( error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
 
     public Mono<ServerResponse> readByRestaurantIdAndStatus(ServerRequest request) {
@@ -82,7 +83,9 @@ public class ReservationHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(reservationResponses))
                 .doOnSuccess(response -> log.info("Get reservations successfully"))
-                .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()));
+                .doOnError(throwable -> log.error("Error while getting reservations", throwable.getMessage()))
+                .onErrorResume(ResourceNotFoundException.class, error -> ErrorResponseFactory.build(HttpStatus.NOT_FOUND, error.getMessage()))
+                .onErrorResume( error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
 
     public Mono<ServerResponse> updateReservation(ServerRequest request) {
@@ -95,13 +98,17 @@ public class ReservationHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(reservationResponse))
                 .doOnSuccess(response -> log.info("Update reservation successfully"))
-                .doOnError(throwable -> log.error("Error while updating reservation", throwable.getMessage()));
+                .doOnError(throwable -> log.error("Error while updating reservation", throwable.getMessage()))
+                .onErrorResume(ResourceNotFoundException.class, error -> ErrorResponseFactory.build(HttpStatus.NOT_FOUND, error.getMessage()))
+                .onErrorResume( error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
 
     public Mono<ServerResponse> deleteReservation(ServerRequest request) {
         return reservationUseCase.deleteReservation(UUID.fromString(request.pathVariable("reservationId")))
                 .then(ServerResponse.noContent().build())
                 .doOnSuccess(response -> log.info("Delete reservation successfully"))
-                .doOnError(throwable -> log.error("Error while deleting reservation", throwable.getMessage()));
+                .doOnError(throwable -> log.error("Error while deleting reservation", throwable.getMessage()))
+                .onErrorResume(ResourceNotFoundException.class, error -> ErrorResponseFactory.build(HttpStatus.NOT_FOUND, error.getMessage()))
+                .onErrorResume( error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
 }
