@@ -1,13 +1,16 @@
 package com.eatshub.catalog.infrastructure.entrypoints.handler;
 
 import com.eatshub.catalog.domain.enums.ReservationStatus;
+import com.eatshub.catalog.domain.exceptions.BusinessException;
 import com.eatshub.catalog.domain.usecase.ReservationUseCase;
 import com.eatshub.catalog.infrastructure.entrypoints.dto.request.ReservationRequest;
 import com.eatshub.catalog.infrastructure.entrypoints.dto.response.ErrorResponse;
 import com.eatshub.catalog.infrastructure.entrypoints.mapper.ReservationMapper;
+import com.eatshub.catalog.infrastructure.entrypoints.util.ErrorResponseFactory;
 import com.eatshub.catalog.infrastructure.entrypoints.util.RequestValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -49,7 +52,10 @@ public class ReservationHandler {
                 )
                 .doOnSuccess(response -> log.info("Get reservation successfully"))
                 .doOnError(throwable -> log.error("Error while getting reservation", throwable.getMessage()))
-                .onErrorResume(throwable -> ServerResponse.badRequest().bodyValue(buildErrorResponse(throwable)));
+                .onErrorResume(throwable -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, throwable.getMessage()))
+                .onErrorResume(BusinessException.class,
+                        throwable -> ErrorResponseFactory.build(HttpStatus.BAD_REQUEST,
+                        throwable.getMessage()));
     }
 
     public Mono<ServerResponse> getReservationsByRestaurant(ServerRequest request) {
@@ -98,12 +104,4 @@ public class ReservationHandler {
                 .doOnSuccess(response -> log.info("Delete reservation successfully"))
                 .doOnError(throwable -> log.error("Error while deleting reservation", throwable.getMessage()));
     }
-
-    private ErrorResponse buildErrorResponse(Throwable throwable) {
-        return ErrorResponse.builder()
-                .status(404)
-                .message(throwable.getMessage())
-                .build();
-    }
-
 }
