@@ -21,7 +21,7 @@ public class RestaurantHandler {
 
     public Mono<ServerResponse> getRestaurants(ServerRequest request) {
         final Long page = Long.parseLong(request.queryParam("page").orElse("0"));
-        final Long pageSize = Long.parseLong(request.queryParam("page").orElse("0"));
+        final Long pageSize = Long.parseLong(request.queryParam("pageSize").orElse("0"));
         return restaurantUseCase.readAll(page, pageSize)
                 .transform(RestaurantMapper.MAPPER::toResponseFLux)
                 .collectList()
