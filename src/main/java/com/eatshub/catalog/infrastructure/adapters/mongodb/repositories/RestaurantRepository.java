@@ -14,5 +14,6 @@ public interface RestaurantRepository extends ReactiveMongoRepository<Restaurant
     Mono<RestaurantCollection> findByNameIgnoreCase(String name);
     Flux<RestaurantCollection> findByPriceType(PriceType priceType);
     Flux<RestaurantCollection> findByAddressCity(String city);
+    Mono<Boolean> existsByAddressCity(String city);
 
 }

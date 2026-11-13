@@ -22,8 +22,10 @@ public class RestaurantCatalogAdapter implements RestaurantCatalogGateway {
     private final RestaurantRepository restaurantRepository;
 
     @Override
-    public Flux<RestaurantModel> readAll() {
+    public Flux<RestaurantModel> readAll(Long page, Long pageSize) {
         return restaurantRepository.findAll()
+                .skip(page * pageSize)
+                .take(pageSize)
                 .doOnNext(restaurantModel -> log.info("id restaurant: " + restaurantModel.getId()))
                 .map(RestaurantAdapterMapper.MAPPER::toModel);
     }
@@ -70,6 +72,11 @@ public class RestaurantCatalogAdapter implements RestaurantCatalogGateway {
                 .map(RestaurantAdapterMapper.MAPPER::toModel)
                 .doOnNext(restaurant -> log.info("Found restaurant in "+ city + " with name: " + restaurant.getName()))
                 .doOnError(error -> log.error("Error: " + error.getMessage()));
+    }
+
+    @Override
+    public Mono<Boolean> existByCity(String city) {
+        return restaurantRepository.existsByAddressCity(city);
     }
 
 }

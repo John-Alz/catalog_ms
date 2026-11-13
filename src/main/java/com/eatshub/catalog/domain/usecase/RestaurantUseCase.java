@@ -1,6 +1,7 @@
 package com.eatshub.catalog.domain.usecase;
 
 import com.eatshub.catalog.domain.constats.Constants;
+import com.eatshub.catalog.domain.exceptions.BusinessException;
 import com.eatshub.catalog.domain.gateways.RestaurantCacheGateway;
 import com.eatshub.catalog.domain.gateways.RestaurantCatalogGateway;
 import com.eatshub.catalog.domain.model.RestaurantModel;
@@ -20,8 +21,8 @@ public class RestaurantUseCase {
     private final RestaurantCatalogGateway restaurantCatalogGateway;
     private final RestaurantCacheGateway restaurantCacheGateway;
 
-    public Flux<RestaurantModel> readAll() {
-        return restaurantCatalogGateway.readAll();
+    public Flux<RestaurantModel> readAll(Long page, Long pageSize) {
+        return restaurantCatalogGateway.readAll(page, pageSize);
     }
 
     public Flux<RestaurantModel> readByCuisineType(String cuisineType) {
@@ -55,19 +56,12 @@ public class RestaurantUseCase {
     }
 
     private Mono<Boolean> validateCityExists(String city){
-        return restaurantCatalogGateway.readAll()
-                .map(RestaurantModel::getAddress)
-                .filter(Objects::nonNull)
-                .map(Address::city)
-                .filter(Objects::nonNull)
-                .distinct()
-                .any(cityName -> cityName.equals(city))
-                .flatMap(exist -> {
-                    if (exist) {
-                        return Mono.just(true);
+        return restaurantCatalogGateway.existByCity(city)
+                .flatMap(isExist -> {
+                    if (!isExist) {
+                        return Mono.error(new BusinessException("City not found: " + city));
                     }
-                    log.warn("City not found: {}", city);
-                    return Mono.error(new RuntimeException("City not found: " + city));
+                    return Mono.just(true);
                 });
     }
 
