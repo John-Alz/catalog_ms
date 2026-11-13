@@ -1,10 +1,12 @@
 package com.eatshub.catalog.infrastructure.entrypoints.handler;
 
-import com.eatshub.catalog.domain.enums.PriceType;
+import com.eatshub.catalog.domain.exceptions.BusinessException;
 import com.eatshub.catalog.domain.usecase.RestaurantUseCase;
 import com.eatshub.catalog.infrastructure.entrypoints.mapper.RestaurantMapper;
+import com.eatshub.catalog.infrastructure.entrypoints.util.ErrorResponseFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -36,7 +38,8 @@ public class RestaurantHandler {
         return restaurantUseCase.readByName(request.pathVariable("name"))
                 .transform(RestaurantMapper.MAPPER::toResponseMono)
                 .flatMap(listRestaurant -> ServerResponse.ok().bodyValue(listRestaurant))
-                .doOnError(error -> log.error("Error consuming restaurant: ", error.getMessage()));
+                .doOnError(error -> log.error("Error consuming restaurant: ", error.getMessage()))
+                .onErrorResume(error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
 
     public Mono<ServerResponse> getRestaurantsByCuisineType(ServerRequest request) {
@@ -72,7 +75,11 @@ public class RestaurantHandler {
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(listRestaurant))
-                .doOnError(error -> log.error("Error consuming restaurants: ", error.getMessage()));
+                .doOnError(error -> log.error("Error consuming restaurants: ", error.getMessage()))
+                .onErrorResume(BusinessException.class, error -> ErrorResponseFactory.build(HttpStatus.BAD_REQUEST,
+                        error.getMessage()))
+                .onErrorResume(error -> ErrorResponseFactory.build(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage()));
     }
+
 
 }
