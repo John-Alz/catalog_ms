@@ -2,8 +2,9 @@ package com.eatshub.catalog.infrastructure.adapters.redis.mapper;
 
 import com.eatshub.catalog.domain.model.RestaurantModel;
 import com.eatshub.catalog.infrastructure.adapters.redis.dto.RestaurantCacheDto;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapper;
 
+@Mapper(componentModel = "spring")
 public interface RestaurantCacheMapper {
 
     RestaurantModel toModel(RestaurantCacheDto restaurantCacheDto);

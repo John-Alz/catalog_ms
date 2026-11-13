@@ -27,6 +27,7 @@ public class RestaurantRouterRest {
                 .GET(has("cuisineType"), handler::getRestaurantsByCuisineType)
                 .GET(has("city"), handler::getRestaurantsByCity)
                 .GET(has("priceType"), handler::getRestaurantsByPriceType)
+                .GET(has("page").and(has("pageSize")), handler::getRestaurants)
                 .GET(handler::getRestaurants)
                 )
                 .build();

@@ -20,7 +20,9 @@ public class RestaurantHandler {
     private final RestaurantUseCase restaurantUseCase;
 
     public Mono<ServerResponse> getRestaurants(ServerRequest request) {
-        return restaurantUseCase.readAll()
+        final Long page = Long.parseLong(request.queryParam("page").orElse("0"));
+        final Long pageSize = Long.parseLong(request.queryParam("pageSize").orElse("0"));
+        return restaurantUseCase.readAll(page, pageSize)
                 .transform(RestaurantMapper.MAPPER::toResponseFLux)
                 .collectList()
                 .flatMap(listRestaurant -> ServerResponse
@@ -32,8 +34,7 @@ public class RestaurantHandler {
 
     public Mono<ServerResponse> getRestaurantByName(ServerRequest request) {
         return restaurantUseCase.readByName(request.pathVariable("name"))
-                .transform(RestaurantMapper.MAPPER::toResponseFLux)
-                .collectList()
+                .transform(RestaurantMapper.MAPPER::toResponseMono)
                 .flatMap(listRestaurant -> ServerResponse.ok().bodyValue(listRestaurant))
                 .doOnError(error -> log.error("Error consuming restaurant: ", error.getMessage()));
     }

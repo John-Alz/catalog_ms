@@ -1,6 +1,7 @@
 package com.eatshub.catalog.domain.usecase;
 
 import com.eatshub.catalog.domain.constats.Constants;
+import com.eatshub.catalog.domain.exceptions.BusinessException;
 import com.eatshub.catalog.domain.gateways.RestaurantCacheGateway;
 import com.eatshub.catalog.domain.gateways.RestaurantCatalogGateway;
 import com.eatshub.catalog.domain.model.RestaurantModel;
@@ -20,8 +21,8 @@ public class RestaurantUseCase {
     private final RestaurantCatalogGateway restaurantCatalogGateway;
     private final RestaurantCacheGateway restaurantCacheGateway;
 
-    public Flux<RestaurantModel> readAll() {
-        return restaurantCatalogGateway.readAll();
+    public Flux<RestaurantModel> readAll(Long page, Long pageSize) {
+        return restaurantCatalogGateway.readAll(page, pageSize);
     }
 
     public Flux<RestaurantModel> readByCuisineType(String cuisineType) {
@@ -33,32 +34,34 @@ public class RestaurantUseCase {
                 ));
     }
 
-    public Flux<RestaurantModel> readByName(String name) {
-        return restaurantCatalogGateway.readByName(name);
+    public Mono<RestaurantModel> readByName(String name) {
+        final String cacheKey = buildNameKey(name);
+        return restaurantCacheGateway.getCacheRestaurant(cacheKey)
+                .switchIfEmpty(Mono.defer(() -> restaurantCatalogGateway.readByName(name)
+                        .flatMap(restaurant -> restaurantCacheGateway.saveCacheRestaurant(cacheKey, restaurant))
+                ));
     }
 
     public Flux<RestaurantModel> readByPriceRange(String priceType) {
         return restaurantCatalogGateway.readByPriceType(PriceType.valueOf(priceType.toUpperCase()));
     }
     public Flux<RestaurantModel> readByCity(String city) {
+        final String cacheKey = buildNameKey(city);
         return  validateCityExists(city)
-                .thenMany(restaurantCatalogGateway.readByCity(city));
+                .flatMapMany(item -> restaurantCacheGateway.getCacheRestaurants(cacheKey)
+                        .switchIfEmpty(Flux.defer(() -> restaurantCatalogGateway.readByCity(city)
+                                .collectList()
+                                .flatMapMany(restaurantModelList -> restaurantCacheGateway.saveCacheRestaurants(cacheKey, restaurantModelList))
+                        )));
     }
 
-    private Mono<Void> validateCityExists(String city){
-        return restaurantCatalogGateway.readAll()
-                .map(RestaurantModel::getAddress)
-                .filter(Objects::nonNull)
-                .map(Address::city)
-                .filter(Objects::nonNull)
-                .distinct()
-                .any(cityName -> cityName.equals(city))
-                .flatMap(exist -> {
-                    if (exist) {
-                        return Mono.empty();
+    private Mono<Boolean> validateCityExists(String city){
+        return restaurantCatalogGateway.existByCity(city)
+                .flatMap(isExist -> {
+                    if (!isExist) {
+                        return Mono.error(new BusinessException("City not found: " + city));
                     }
-                    log.warn("City not found: {}", city);
-                    return Mono.error(new RuntimeException("City not found: " + city));
+                    return Mono.just(true);
                 });
     }
 

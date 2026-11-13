@@ -4,7 +4,6 @@ import com.eatshub.catalog.domain.gateways.RestaurantCacheGateway;
 import com.eatshub.catalog.domain.model.RestaurantModel;
 import com.eatshub.catalog.infrastructure.adapters.redis.dto.RestaurantCacheDto;
 import com.eatshub.catalog.infrastructure.adapters.redis.mapper.RestaurantCacheMapper;
-import com.mongodb.internal.connection.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
