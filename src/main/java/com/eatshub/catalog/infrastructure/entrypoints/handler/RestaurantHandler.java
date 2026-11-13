@@ -32,8 +32,7 @@ public class RestaurantHandler {
 
     public Mono<ServerResponse> getRestaurantByName(ServerRequest request) {
         return restaurantUseCase.readByName(request.pathVariable("name"))
-                .transform(RestaurantMapper.MAPPER::toResponseFLux)
-                .collectList()
+                .transform(RestaurantMapper.MAPPER::toResponseMono)
                 .flatMap(listRestaurant -> ServerResponse.ok().bodyValue(listRestaurant))
                 .doOnError(error -> log.error("Error consuming restaurant: ", error.getMessage()));
     }

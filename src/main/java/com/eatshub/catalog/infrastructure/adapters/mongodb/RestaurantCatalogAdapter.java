@@ -2,7 +2,6 @@ package com.eatshub.catalog.infrastructure.adapters.mongodb;
 
 import com.eatshub.catalog.domain.enums.PriceType;
 import com.eatshub.catalog.domain.model.RestaurantModel;
-import com.eatshub.catalog.domain.records.Address;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.entity.RestaurantCollection;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.mapper.RestaurantAdapterMapper;
 import com.eatshub.catalog.infrastructure.adapters.mongodb.repositories.RestaurantRepository;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -49,13 +47,13 @@ public class RestaurantCatalogAdapter implements RestaurantCatalogGateway {
     }
 
     @Override
-    public Flux<RestaurantModel> readByName(String name) {
-        return restaurantRepository.findByNameContainingIgnoreCase(name)
+    public Mono<RestaurantModel> readByName(String name) {
+        return restaurantRepository.findByNameIgnoreCase(name)
                 .map(RestaurantAdapterMapper.MAPPER::toModel)
                 .doOnSubscribe(subscription -> log.info("Name restaurant: " + name))
                 .doOnNext(restaurant -> log.info("Found with param: " + restaurant.getName()))
                 .doOnError(error -> log.error("Error: " + error.getMessage()))
-                .onErrorResume(error -> Flux.empty());
+                .onErrorResume(error -> Mono.empty());
     }
 
     @Override

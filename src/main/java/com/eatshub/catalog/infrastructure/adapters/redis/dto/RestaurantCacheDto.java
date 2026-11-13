@@ -22,6 +22,5 @@ public record RestaurantCacheDto(
          ContactInfo contactInfo,
          List<Review>reviews
 
-
 ) {
 }

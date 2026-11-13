@@ -33,19 +33,28 @@ public class RestaurantUseCase {
                 ));
     }
 
-    public Flux<RestaurantModel> readByName(String name) {
-        return restaurantCatalogGateway.readByName(name);
+    public Mono<RestaurantModel> readByName(String name) {
+        final String cacheKey = buildNameKey(name);
+        return restaurantCacheGateway.getCacheRestaurant(cacheKey)
+                .switchIfEmpty(Mono.defer(() -> restaurantCatalogGateway.readByName(name)
+                        .flatMap(restaurant -> restaurantCacheGateway.saveCacheRestaurant(cacheKey, restaurant))
+                ));
     }
 
     public Flux<RestaurantModel> readByPriceRange(String priceType) {
         return restaurantCatalogGateway.readByPriceType(PriceType.valueOf(priceType.toUpperCase()));
     }
     public Flux<RestaurantModel> readByCity(String city) {
+        final String cacheKey = buildNameKey(city);
         return  validateCityExists(city)
-                .thenMany(restaurantCatalogGateway.readByCity(city));
+                .flatMapMany(item -> restaurantCacheGateway.getCacheRestaurants(cacheKey)
+                        .switchIfEmpty(Flux.defer(() -> restaurantCatalogGateway.readByCity(city)
+                                .collectList()
+                                .flatMapMany(restaurantModelList -> restaurantCacheGateway.saveCacheRestaurants(cacheKey, restaurantModelList))
+                        )));
     }
 
-    private Mono<Void> validateCityExists(String city){
+    private Mono<Boolean> validateCityExists(String city){
         return restaurantCatalogGateway.readAll()
                 .map(RestaurantModel::getAddress)
                 .filter(Objects::nonNull)
@@ -55,7 +64,7 @@ public class RestaurantUseCase {
                 .any(cityName -> cityName.equals(city))
                 .flatMap(exist -> {
                     if (exist) {
-                        return Mono.empty();
+                        return Mono.just(true);
                     }
                     log.warn("City not found: {}", city);
                     return Mono.error(new RuntimeException("City not found: " + city));

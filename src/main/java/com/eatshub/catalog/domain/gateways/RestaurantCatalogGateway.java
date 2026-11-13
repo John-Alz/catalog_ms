@@ -12,7 +12,7 @@ public interface RestaurantCatalogGateway {
     Flux<RestaurantModel> readAll();
     Mono<RestaurantModel> readById(UUID id);
     Flux<RestaurantModel> readByCuisineType(String cuisineType);
-    Flux<RestaurantModel> readByName(String name);
+    Mono<RestaurantModel> readByName(String name);
     Flux<RestaurantModel> readByPriceType(PriceType priceType);
     Flux<RestaurantModel> readByCity(String city);
 
